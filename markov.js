@@ -1,6 +1,6 @@
 "use strict";
-const fsP = require("fs/promises");
-const FILE_PATH = process.argv[2];
+// const fsP = require("fs/promises");
+// const FILE_PATH = process.argv[2];
 
 /** Textual markov chain generator. */
 
@@ -19,13 +19,13 @@ class MarkovMachine {
   /** Get markov chain: returns Map of Markov chains.
    *
    *  For text of "The cat in the hat.", chains will be:
-   *
+   *  this.chain.0 = ["cat"]
    *  {
-   *   "The": ["cat"],
-   *   "cat": ["in"],
-   *   "in": ["the"],
-   *   "the": ["hat."],
-   *   "hat.": [null]
+   *  0 "The": ["cat"],
+   *  1 "cat": ["in"],
+   *  2 "in": ["the"],
+   *  3 "the": ["hat."],
+   *  4 "hat.": [null]
    *  }
    *
    * */
@@ -37,12 +37,11 @@ class MarkovMachine {
     const words = this.words;
 
     for (let i = 0; i < length; i++) {
-      let word = words[i+1] || null;
-
+      let nextWord = words[i + 1] || null;
       if (!chains.has(words[i])) {
-        chains.set(words[i], [word])
+        chains.set(words[i], [nextWord])
       } else {
-        chains.get(words[i]).push(word)
+        chains.get(words[i]).push(nextWord)
       }
     }
     return chains
@@ -53,12 +52,20 @@ class MarkovMachine {
    *  until it hits a null choice. */
 
   getText() {
-    // TODO: implement this!
-
-    let num = Math.floor(Math.random() * (this.chains.length + 1));
-
-    // - start at the first word in the input text
-    // - find a random word from the following-words of that
-    // - repeat until reaching the terminal null
+    let randomText = this.words[0]
+    let randomWord;
+    while (randomWord !== null) {
+      let keys = Array.from(this.chains.keys()); //[this, cat, in, the , hat]
+      let randomKey = Math.floor(Math.random() * (keys.length));
+      //3 get(3)
+      let words = this.chains.get(keys[randomKey]) //this.chains.get("randomWord") valuesArray = [words, words]
+      randomWord = words[Math.floor(Math.random() * words.length)];
+      randomText += ` ${keys[randomKey]} ${randomWord || ""}`;
+    }
+    return randomText.substring(0, randomText.length - 1) + "."
   }
+
 }
+
+module.exports = { MarkovMachine }
+
